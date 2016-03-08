@@ -74,6 +74,17 @@ func mergeImages(rowNumber int, baseURL string, logoURL string) {
 
 	getImages(baseURL, logoURL, rowNumber)
 
+	glueImages(rowNumber)
+}
+
+// getImage func
+func getImages(baseRUL string, logoURL string, rowNumber int) {
+	getBaseImage(baseRUL, rowNumber)
+	getLogoImage(logoURL, rowNumber)
+}
+
+// glueImages func
+func glueImages(rowNumber int) {
 	var basePath bytes.Buffer
 	var logoPath bytes.Buffer
 	var mergedPath bytes.Buffer
@@ -129,12 +140,6 @@ func mergeImages(rowNumber int, baseURL string, logoURL string) {
 	os.Remove(logoPath.String())
 
 	wg.Done()
-}
-
-// getImage func
-func getImages(baseRUL string, logoURL string, rowNumber int) {
-	getBaseImage(baseRUL, rowNumber)
-	getLogoImage(logoURL, rowNumber)
 }
 
 // getBaseImage func
