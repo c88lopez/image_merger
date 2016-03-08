@@ -37,14 +37,10 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("%#v\n", config.CsvPath)
-
 	file, err = os.Open(config.CsvPath)
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Printf("%#v\n", file)
 
 	reader := csv.NewReader(bufio.NewReader(file))
 	record, err := reader.Read()
@@ -54,12 +50,13 @@ func main() {
 	for {
 		record, err = reader.Read()
 
+		// only for debug
 		if err == io.EOF {
 			break
 		}
 
 		wg.Add(1)
-		go mergeImages(rowNumber, record[0], record[1])
+		go mergeImages(rowNumber, record[26], record[5])
 		rowNumber++
 	}
 
@@ -70,10 +67,7 @@ func main() {
 
 // mergeImages func
 func mergeImages(rowNumber int, baseURL string, logoURL string) {
-	fmt.Println("@mergeImages")
-
 	getImages(baseURL, logoURL, rowNumber)
-
 	glueImages(rowNumber)
 }
 
@@ -90,17 +84,14 @@ func glueImages(rowNumber int) {
 	var mergedPath bytes.Buffer
 
 	basePath.WriteString("tmp/images/base/")
-
 	basePath.WriteString(strconv.Itoa(rowNumber))
-	// basePath.WriteString(".jpg")
 
 	bf, err := os.Open(basePath.String())
 	if err != nil {
 		panic(err)
 	}
-	defer bf.Close()
 
-	baseImg, err := jpeg.Decode(bufio.NewReader(bf))
+	baseImg, err := png.Decode(bufio.NewReader(bf))
 	if err != nil {
 		panic(err)
 	}
@@ -114,7 +105,6 @@ func glueImages(rowNumber int) {
 	if err != nil {
 		panic(err)
 	}
-	defer lf.Close()
 
 	logoImg, err := jpeg.Decode(bufio.NewReader(lf))
 	if err != nil {
@@ -122,7 +112,7 @@ func glueImages(rowNumber int) {
 	}
 
 	draw.Draw(base, baseImg.Bounds(), baseImg, image.Point{0, 0}, draw.Src)
-	draw.Draw(base, logoImg.Bounds(), logoImg, image.Point{0, 0}, draw.Src)
+	draw.Draw(base, logoImg.Bounds(), logoImg, image.Point{15, 15}, draw.Src)
 
 	mergedPath.WriteString("tmp/images/merged/")
 	mergedPath.WriteString(strconv.Itoa(rowNumber))
@@ -136,29 +126,23 @@ func glueImages(rowNumber int) {
 	w := bufio.NewWriter(mergeFile)
 	png.Encode(w, base)
 
-	os.Remove(basePath.String())
-	os.Remove(logoPath.String())
+	defer os.Remove(basePath.String())
+	defer os.Remove(logoPath.String())
 
 	wg.Done()
 }
 
 // getBaseImage func
 func getBaseImage(baseRUL string, rowNumber int) {
-	fmt.Printf("> Image: %s\n", baseRUL)
-
 	var imagePath bytes.Buffer
 	imagePath.WriteString("tmp/images/base/")
-
 	imagePath.WriteString(strconv.Itoa(rowNumber))
-	// imagePath.WriteString(".jpg")
 
-	fmt.Printf("> Image path: %s\n", imagePath.String())
 	out, err := os.Create(imagePath.String())
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("> Getting: %s\n", baseRUL)
 	response, err := http.Get(baseRUL)
 	if err != nil {
 		panic(err)
@@ -168,27 +152,19 @@ func getBaseImage(baseRUL string, rowNumber int) {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Printf("Base %d downloaded.\n", rowNumber)
 }
 
 // getLogoImage func
 func getLogoImage(logoURL string, rowNumber int) {
-	fmt.Printf("> Image: %s\n", logoURL)
-
 	var imagePath bytes.Buffer
 	imagePath.WriteString("tmp/images/logo/")
-
 	imagePath.WriteString(strconv.Itoa(rowNumber))
-	// imagePath.WriteString(".gif")
 
-	fmt.Printf("> Image path: %s\n", imagePath.String())
 	out, err := os.Create(imagePath.String())
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("> Getting: %s\n", logoURL)
 	response, err := http.Get(logoURL)
 	if err != nil {
 		panic(err)
@@ -198,6 +174,4 @@ func getLogoImage(logoURL string, rowNumber int) {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Printf("Logo %d downloaded.\n", rowNumber)
 }
