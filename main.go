@@ -18,6 +18,11 @@ import (
 	"time"
 )
 
+type job struct {
+	rowNumber int
+	record    []string
+}
+
 var wg sync.WaitGroup
 
 // main func
@@ -47,6 +52,12 @@ func main() {
 
 	rowNumber := 2
 
+	jobs := make(chan job, 100)
+
+	for w := 1; w <= 25; w++ {
+		go worker(jobs)
+	}
+
 	for {
 		record, err = reader.Read()
 
@@ -56,13 +67,21 @@ func main() {
 		}
 
 		wg.Add(1)
-		go mergeImages(rowNumber, record[26], record[5])
+		// go mergeImages(rowNumber, record[26], record[5])
+		jobs <- job{rowNumber, record}
 		rowNumber++
 	}
 
 	wg.Wait()
 
 	fmt.Printf("%s\n", time.Since(now))
+}
+
+// worker func
+func worker(jobs <-chan job) {
+	for j := range jobs {
+		mergeImages(j.rowNumber, j.record[26], j.record[5])
+	}
 }
 
 // mergeImages func
@@ -128,6 +147,8 @@ func glueImages(rowNumber int) {
 
 	defer os.Remove(basePath.String())
 	defer os.Remove(logoPath.String())
+
+	fmt.Printf("%s %s\n", "Generated", mergedPath)
 
 	wg.Done()
 }

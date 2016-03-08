@@ -1,4 +1,4 @@
 *.csv
-images/base/*
-images/logo/*
-images/merged/*
+tmp/images/base/*
+tmp/images/logo/*
+tmp/images/merged/*
