@@ -91,9 +91,9 @@ func mergeImages(rowNumber int, baseURL string, logoURL string) {
 }
 
 // getImage func
-func getImages(baseRUL string, logoURL string, rowNumber int) {
-	getBaseImage(baseRUL, rowNumber)
-	getLogoImage(logoURL, rowNumber)
+func getImages(baseURL string, logoURL string, rowNumber int) {
+	getImage(baseURL, rowNumber, "base")
+	getImage(logoURL, rowNumber, "logo")
 }
 
 // glueImages func
@@ -154,9 +154,11 @@ func glueImages(rowNumber int) {
 }
 
 // getBaseImage func
-func getBaseImage(baseRUL string, rowNumber int) {
+func getImage(URL string, rowNumber int, imageType string) {
 	var imagePath bytes.Buffer
-	imagePath.WriteString("tmp/base/")
+	imagePath.WriteString("tmp/")
+	imagePath.WriteString(imageType)
+	imagePath.WriteString("/")
 	imagePath.WriteString(strconv.Itoa(rowNumber))
 
 	out, err := os.Create(imagePath.String())
@@ -164,29 +166,7 @@ func getBaseImage(baseRUL string, rowNumber int) {
 		panic(err)
 	}
 
-	response, err := http.Get(baseRUL)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = io.Copy(out, response.Body)
-	if err != nil {
-		panic(err)
-	}
-}
-
-// getLogoImage func
-func getLogoImage(logoURL string, rowNumber int) {
-	var imagePath bytes.Buffer
-	imagePath.WriteString("tmp/logo/")
-	imagePath.WriteString(strconv.Itoa(rowNumber))
-
-	out, err := os.Create(imagePath.String())
-	if err != nil {
-		panic(err)
-	}
-
-	response, err := http.Get(logoURL)
+	response, err := http.Get(URL)
 	if err != nil {
 		panic(err)
 	}
