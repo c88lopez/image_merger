@@ -102,7 +102,7 @@ func glueImages(rowNumber int) {
 	var logoPath bytes.Buffer
 	var mergedPath bytes.Buffer
 
-	basePath.WriteString("tmp/images/base/")
+	basePath.WriteString("tmp/base/")
 	basePath.WriteString(strconv.Itoa(rowNumber))
 
 	bf, err := os.Open(basePath.String())
@@ -117,7 +117,7 @@ func glueImages(rowNumber int) {
 
 	base := image.NewRGBA(image.Rect(baseImg.Bounds().Min.X, baseImg.Bounds().Min.Y, baseImg.Bounds().Max.X, baseImg.Bounds().Max.Y))
 
-	logoPath.WriteString("tmp/images/logo/")
+	logoPath.WriteString("tmp/logo/")
 	logoPath.WriteString(strconv.Itoa(rowNumber))
 
 	lf, err := os.Open(logoPath.String())
@@ -133,7 +133,7 @@ func glueImages(rowNumber int) {
 	draw.Draw(base, baseImg.Bounds(), baseImg, image.Point{0, 0}, draw.Src)
 	draw.Draw(base, logoImg.Bounds(), logoImg, image.Point{15, 15}, draw.Src)
 
-	mergedPath.WriteString("tmp/images/merged/")
+	mergedPath.WriteString("images/")
 	mergedPath.WriteString(strconv.Itoa(rowNumber))
 	mergedPath.WriteString(".png")
 
@@ -148,7 +148,7 @@ func glueImages(rowNumber int) {
 	defer os.Remove(basePath.String())
 	defer os.Remove(logoPath.String())
 
-	fmt.Printf("%s %s\n", "Generated", mergedPath)
+	fmt.Printf("%s %s\n", "Generated", mergedPath.String())
 
 	wg.Done()
 }
@@ -156,7 +156,7 @@ func glueImages(rowNumber int) {
 // getBaseImage func
 func getBaseImage(baseRUL string, rowNumber int) {
 	var imagePath bytes.Buffer
-	imagePath.WriteString("tmp/images/base/")
+	imagePath.WriteString("tmp/base/")
 	imagePath.WriteString(strconv.Itoa(rowNumber))
 
 	out, err := os.Create(imagePath.String())
@@ -178,7 +178,7 @@ func getBaseImage(baseRUL string, rowNumber int) {
 // getLogoImage func
 func getLogoImage(logoURL string, rowNumber int) {
 	var imagePath bytes.Buffer
-	imagePath.WriteString("tmp/images/logo/")
+	imagePath.WriteString("tmp/logo/")
 	imagePath.WriteString(strconv.Itoa(rowNumber))
 
 	out, err := os.Create(imagePath.String())
